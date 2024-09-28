@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Load data
-weather_data = pd.read_csv('../datasets/processed_weatherAUS (2).csv')
+weather_data = pd.read_csv('datasets/processed_weatherAUS.csv')
 
 # Convert Date column to datetime format
 weather_data['Date'] = pd.to_datetime(weather_data['Date'])
