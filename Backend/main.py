@@ -41,24 +41,28 @@ async def predict_weather(request: PredictionRequest):
 
 @app.get("/predict/{location}/{start_date}")
 async def get_predict(location: str, start_date: str):
+    # Validate and parse start_date
     try:
         start_date = datetime.strptime(start_date, "%Y-%m-%d")
         future_dates = pd.date_range(start=start_date, periods=7, freq='D')
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date format.")
-    
-    try: 
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+
+    # Initialize the prediction model
+    try:
         model = WeatherPredictionModel(location)
     except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail=f"Required model file not found. {str(e)}")
+        raise HTTPException(status_code=404, detail=f"Required model file not found: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error initializing model: {str(e)}")
-    
-    try: 
+
+    # Generate predictions
+    try:
         predictions = model.predict(future_dates)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"error during prediciton: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error during prediction: {str(e)}")
     
+    # Format predictions for JSON response
     predictions_output = predictions.to_dict(orient="records")
     return {
         "location": location,
@@ -83,7 +87,9 @@ async def test_load_models(location: str):
         "scaler_exists": scaler_file.is_file(),
     }
 
+
     print("Model paths and existence status:", files_exist)
+
 
     try:
         model = WeatherPredictionModel(location)
