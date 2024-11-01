@@ -3,18 +3,15 @@ import pandas as pd
 import pickle
 import os
 from sklearn.preprocessing import StandardScaler
-from pathlib import Path
 
 
 model_path = os.path.join(os.path.dirname(__file__), 'trained_model')
 csv_path = os.path.join(os.path.dirname(__file__), 'merged_data.csv')
-scaler = StandardScaler()
-
 
 try:
     merged_data = pd.read_csv(csv_path)
 except FileNotFoundError:
-    raise FileNotFoundError(f"csv file not found at {csv_path}")
+    raise FileNotFoundError(f"CSV file not found at {csv_path}")
 
 
 class WeatherPredictionModel:
@@ -27,8 +24,8 @@ class WeatherPredictionModel:
         self.load_location_models()
 
 
-    # Function to load models based on location
     def load_location_models(self):
+        # Define paths for models and scaler
         min_temp_model_file = os.path.join(model_path, f'min_temp_model_{self.location}.pkl')
         max_temp_model_file = os.path.join(model_path, f'max_temp_model_{self.location}.pkl')
         rain_model_file = os.path.join(model_path, f'rain_model_{self.location}.pkl')
@@ -51,7 +48,6 @@ class WeatherPredictionModel:
             raise FileNotFoundError(f"Model file not found: {e.filename}")
         except Exception as e:
             raise RuntimeError(f"Error loading model: {e}")
-        
 
 
     def prepare_data(self, future_dates):
@@ -60,8 +56,9 @@ class WeatherPredictionModel:
         future_data['DayOfYear'] = future_data['Date'].dt.dayofyear
         future_data['DayOfWeek'] = future_data['Date'].dt.dayofweek
 
-        # Load historical data for merging
-        merged_data = pd.read_csv('BockCuster/Backend/merged_data.csv')
+        # Load historical averages and print to debug
+        print("Future dates DataFrame:", future_data)
+
         historical_averages = merged_data.groupby('DayOfYear').agg({
             'MinTemp': 'mean',
             'MaxTemp': 'mean',
@@ -73,13 +70,17 @@ class WeatherPredictionModel:
             'Daily_Flu_Cases': 'mean'
         }).reset_index()
 
-        # Merge historical averages with future dates
-        future_data = future_data.merge(historical_averages, on='DayOfYear', how='left')
+        print("Historical averages DataFrame:", historical_averages)
 
-        # Select features and apply scaling
+        # Merge historical averages with future dates and print for verification
+        future_data = future_data.merge(historical_averages, on='DayOfYear', how='left')
+        print("Merged future data with historical averages:", future_data)
+
+        # Scale the data and print the scaled values
         X_future = future_data[['MinTemp', 'MaxTemp', 'Rainfall', 'WindSpeedAve', 'HumidityAve', 
                                 'PressureAve', 'CloudAve', 'Daily_Flu_Cases', 'DayOfYear', 'DayOfWeek']].values
         X_future_scaled = self.scaler.transform(X_future)
+        print("Scaled future data:", X_future_scaled)
 
         return future_data, X_future_scaled
 
@@ -92,17 +93,23 @@ class WeatherPredictionModel:
         # Generate predictions and print results for debugging
         try:
             future_data['Predicted_ChanceOfRain'] = np.clip(self.rain_model.predict_proba(X_future_scaled)[:, 1] * 100, 0, 100)
+            print("Predicted Chance of Rain:", future_data['Predicted_ChanceOfRain'])
 
             future_data['Predicted_Min_Temp'] = self.min_temp_model.predict(X_future_scaled)
+            print("Predicted Min Temp:", future_data['Predicted_Min_Temp'])
 
             future_data['Predicted_Max_Temp'] = self.max_temp_model.predict(X_future_scaled)
+            print("Predicted Max Temp:", future_data['Predicted_Max_Temp'])
 
             future_data['Predicted_Rain'] = self.rain_model.predict(X_future_scaled)
+            print("Predicted Rain:", future_data['Predicted_Rain'])
         except Exception as e:
+            print("Error during prediction:", e)
             raise e
 
         # Format the output
         predictions_output = future_data[['Date', 'Predicted_Min_Temp', 'Predicted_Max_Temp', 'Predicted_ChanceOfRain', 'Rainfall']]
+        print("Predictions output:", predictions_output)
         return predictions_output
 
 
@@ -116,4 +123,3 @@ if __name__ == "__main__":
     
     # Make predictions
     predictions = model.predict(future_dates)
-    print(predictions)

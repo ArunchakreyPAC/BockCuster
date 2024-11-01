@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from datetime import datetime
-from pathlib import Path
+from datetime import datetime, timedelta
 import pandas as pd
 from model import WeatherPredictionModel
+from pathlib import Path
 
 app = FastAPI()
 
@@ -70,16 +70,16 @@ async def get_predict(location: str, start_date: str):
         "predictions": predictions_output
     }
 
-
-
 @app.get("/test-load-models/{location}")
 async def test_load_models(location: str):
+    # Define paths based on the location
     base_path = Path(__file__).parent / 'trained_model'
     min_temp_model_file = base_path / f'min_temp_model_{location}.pkl'
     max_temp_model_file = base_path / f'max_temp_model_{location}.pkl'
     rain_model_file = base_path / f'rain_model_{location}.pkl'
     scaler_file = base_path / f'model_scaler_{location}.pkl'
 
+    # Check if files exist and print status
     files_exist = {
         "min_temp_model_exists": min_temp_model_file.is_file(),
         "max_temp_model_exists": max_temp_model_file.is_file(),
@@ -94,12 +94,11 @@ async def test_load_models(location: str):
     try:
         model = WeatherPredictionModel(location)
     except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail=f'file node found: {e.filename}')
+        raise HTTPException(status_code=404, detail=f"File not found: {e.filename}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
-    return {"status": "Models loaded successfully", "file_status": files_exist}
 
+    return {"status": "Models loaded successfully", "file_status": files_exist}
 
 
 if __name__ == "__main__":
