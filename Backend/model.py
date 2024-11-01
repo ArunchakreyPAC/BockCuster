@@ -3,18 +3,11 @@ import pandas as pd
 import pickle
 import os
 from sklearn.preprocessing import StandardScaler
-from pathlib import Path
 
 
 model_path = os.path.join(os.path.dirname(__file__), 'trained_model')
-csv_path = os.path.join(os.path.dirname(__file__), 'merged_data.csv')
+merged_data = pd.read_csv(os.path.join(os.path.dirname(__file__), 'merged_data.csv'))
 scaler = StandardScaler()
-
-
-try:
-    merged_data = pd.read_csv(csv_path)
-except FileNotFoundError:
-    raise FileNotFoundError(f"csv file not found at {csv_path}")
 
 
 class WeatherPredictionModel:
@@ -34,24 +27,53 @@ class WeatherPredictionModel:
         rain_model_file = os.path.join(model_path, f'rain_model_{self.location}.pkl')
         scaler_file = os.path.join(model_path, f'model_scaler_{self.location}.pkl')
 
-        # Load models and scaler with error handling
+        with open(min_temp_model_file, 'rb') as file:
+            min_temp_model = pickle.load(file)
+            
+        with open(max_temp_model_file, 'rb') as file:
+            max_temp_model = pickle.load(file)
+            
+        with open(rain_model_file, 'rb') as file:
+            rain_model = pickle.load(file)
+
+        # Load min temp model
         try:
             with open(min_temp_model_file, 'rb') as file:
                 self.min_temp_model = pickle.load(file)
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Min temp model file {min_temp_model_file} not found.")
+
+        # Load max temp model
+        try:
             with open(max_temp_model_file, 'rb') as file:
                 self.max_temp_model = pickle.load(file)
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Max temp model file {max_temp_model_file} not found.")
+
+        # Load rain model and check for RandomForestClassifier
+        try:
             with open(rain_model_file, 'rb') as file:
                 self.rain_model = pickle.load(file)
+            if not hasattr(self.rain_model, "predict_proba"):
+                raise TypeError("Loaded rain model is not compatible; it should support predict_proba.")
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Rain model file {rain_model_file} not found.")
+        except Exception as e:
+            raise RuntimeError(f"Error loading rain model: {e}")
+
+        # Load scaler and ensure it's a StandardScaler
+        try:
             with open(scaler_file, 'rb') as file:
                 self.scaler = pickle.load(file)
-            # Check scaler type
             if not isinstance(self.scaler, StandardScaler):
                 raise TypeError("Loaded scaler is not a StandardScaler instance.")
-        except FileNotFoundError as e:
-            raise FileNotFoundError(f"Model file not found: {e.filename}")
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Scaler file {scaler_file} not found.")
         except Exception as e:
-            raise RuntimeError(f"Error loading model: {e}")
-        
+            raise RuntimeError(f"Error loading scaler: {e}")
+            
+
+        return min_temp_model, max_temp_model, rain_model, scaler
 
 
     def prepare_data(self, future_dates):
@@ -80,7 +102,6 @@ class WeatherPredictionModel:
         X_future = future_data[['MinTemp', 'MaxTemp', 'Rainfall', 'WindSpeedAve', 'HumidityAve', 
                                 'PressureAve', 'CloudAve', 'Daily_Flu_Cases', 'DayOfYear', 'DayOfWeek']].values
         X_future_scaled = self.scaler.transform(X_future)
-
         return future_data, X_future_scaled
 
 
@@ -89,22 +110,17 @@ class WeatherPredictionModel:
         """Predict weather features for the specified future dates."""
         future_data, X_future_scaled = self.prepare_data(future_dates)
 
-        # Generate predictions and print results for debugging
-        try:
-            future_data['Predicted_ChanceOfRain'] = np.clip(self.rain_model.predict_proba(X_future_scaled)[:, 1] * 100, 0, 100)
+        # Make predictions
+        future_data['Predicted_ChanceOfRain'] = np.clip(self.rain_model.predict_proba(X_future_scaled)[:, 1] * 100, 0, 100)
+        future_data['Predicted_Min_Temp'] = self.min_temp_model.predict(X_future_scaled)
+        future_data['Predicted_Max_Temp'] = self.max_temp_model.predict(X_future_scaled)
+        future_data['Predicted_Rain'] = self.rain_model.predict(X_future_scaled)
 
-            future_data['Predicted_Min_Temp'] = self.min_temp_model.predict(X_future_scaled)
-
-            future_data['Predicted_Max_Temp'] = self.max_temp_model.predict(X_future_scaled)
-
-            future_data['Predicted_Rain'] = self.rain_model.predict(X_future_scaled)
-        except Exception as e:
-            raise e
-
-        # Format the output
+        # Display or return results
         predictions_output = future_data[['Date', 'Predicted_Min_Temp', 'Predicted_Max_Temp', 'Predicted_ChanceOfRain', 'Rainfall']]
+        # print(f"\nPredictions for future dates at {self.location}:")
+        # print(predictions_output)
         return predictions_output
-
 
 # Example usage
 if __name__ == "__main__":
@@ -116,4 +132,3 @@ if __name__ == "__main__":
     
     # Make predictions
     predictions = model.predict(future_dates)
-    print(predictions)
