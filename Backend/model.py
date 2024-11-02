@@ -3,6 +3,8 @@ import pandas as pd
 import pickle
 import os
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
 
 
 model_path = os.path.join(os.path.dirname(__file__), 'trained_model')
@@ -85,7 +87,6 @@ class WeatherPredictionModel:
         return future_data, X_future_scaled
 
 
-
     def predict(self, future_dates):
         """Predict weather features for the specified future dates."""
         future_data, X_future_scaled = self.prepare_data(future_dates)
@@ -113,13 +114,74 @@ class WeatherPredictionModel:
         return predictions_output
 
 
+
+class InfluenzaPredictionModel:
+    def __init__(self):
+        self.flu_model = None
+
+    
+    def predict_flu(self, future_dates):
+
+        merged_data_cleaned = merged_data.dropna()
+
+        X_flu = merged_data_cleaned[['MinTemp', 'MaxTemp', 'Rainfall', 'WindSpeedAve', 'HumidityAve', 'PressureAve', 'CloudAve', 'DayOfYear', 'DayOfWeek']]
+        y_flu = merged_data_cleaned['Daily_Flu_Cases']
+
+        # splitting the dataset into training and testing sets
+        X_train_flu, X_test_flu, y_train_flu, y_test_flu = train_test_split(X_flu, y_flu, test_size=0.2, random_state=42)
+
+        # initialize the linear regression model
+        flu_model_lr = LinearRegression()
+
+        # train the model
+        flu_model_lr.fit(X_train_flu, y_train_flu)
+
+        # make predictions on the test set
+        y_pred_flu_lr = flu_model_lr.predict(X_test_flu)
+
+        # future dates for predictions
+        # future_dates = pd.date_range(start=future_dates, periods=7, freq='D')
+
+        # create a dataframe for future dates
+        future_data = pd.DataFrame(future_dates, columns=['Date'])
+        future_data['DayOfYear'] = future_data['Date'].dt.dayofyear
+        future_data['DayOfWeek'] = future_data['Date'].dt.dayofweek
+
+        # use historical averages for weather data
+        historical_averages = merged_data_cleaned.groupby('DayOfYear').agg({
+            'MinTemp': 'mean',
+            'MaxTemp': 'mean',
+            'Rainfall': 'mean',
+            'WindSpeedAve': 'mean',
+            'HumidityAve': 'mean',
+            'PressureAve': 'mean',
+            'CloudAve': 'mean'
+        }).reset_index()
+
+
+        # merge the historical averages with the future date features
+        future_data = future_data.merge(historical_averages, on='DayOfYear', how='left')
+
+        # select features for prediction (ensure it matches the training features)
+        X_future = future_data[['MinTemp', 'MaxTemp', 'Rainfall', 'WindSpeedAve', 'HumidityAve', 'PressureAve', 'CloudAve', 'DayOfYear', 'DayOfWeek']]
+
+        # predict flu cases using the trained model
+        future_data['Predicted_Flu_Cases'] = flu_model_lr.predict(X_future)
+
+        return future_data[['Date', 'Predicted_Flu_Cases']]
+
+
+
+
 # Example usage
 if __name__ == "__main__":
     location = 'Melbourne'
-    model = WeatherPredictionModel(location)
+    # model = WeatherPredictionModel(location)
+    model = InfluenzaPredictionModel()
     
     # Set up future dates for prediction
     future_dates = pd.date_range(start='2024-9-23', periods=7, freq='D')
     
     # Make predictions
-    predictions = model.predict(future_dates)
+    predictions = model.predict_flu(future_dates)
+    print(predictions)
