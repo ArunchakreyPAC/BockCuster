@@ -165,6 +165,7 @@ class InfluenzaPredictionModel:
         # predict flu cases using the trained model
         future_data['Predicted_Flu_Cases'] = flu_model_lr.predict(X_future)
 
+
         def classify_flu_risk(predicted_cases):
             if predicted_cases < 50:
                 return "Low Risk"
@@ -172,6 +173,7 @@ class InfluenzaPredictionModel:
                 return "Moderate Risk"
             else:
                 return "High Risk"
+            
 
         # apply the classification to the predicted flu cases
         future_data['Flu_Risk_Category'] = future_data['Predicted_Flu_Cases'].apply(classify_flu_risk)
@@ -184,6 +186,7 @@ class InfluenzaPredictionModel:
 
 # Example usage
 if __name__ == "__main__":
+    
     location = 'Melbourne'
     # model = WeatherPredictionModel(location)
     model = InfluenzaPredictionModel()

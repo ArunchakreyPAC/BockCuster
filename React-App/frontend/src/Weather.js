@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Container, Grid, Paper, Button, Typography, TextField, MenuItem, FormControl,
-  InputLabel, Select, CircularProgress
+  InputLabel, Select, CircularProgress, FormControlLabel, Checkbox
 } from '@mui/material';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
@@ -25,7 +25,10 @@ function Weather() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [chartData, setChartData] = useState(null);
-
+  const [showMinTemp, setShowMinTemp] = useState(true);
+  const [showMaxTemp, setShowMaxTemp] = useState(true);
+  const [showRainChance, setShowRainChance] =useState(true);
+  const [showRainfall, setShowRainfall] = useState(true);
   const [predictions, setPredictions] = useState(null); // storing raw API response
 
   const handleSubmit = async (e) => {
@@ -57,24 +60,28 @@ function Weather() {
             data: minTemps,
             borderColor: 'rgba(75, 192, 192, 1)',
             fill: false,
+            hidden: !showMinTemp,
           },
           {
             label: 'Max Temperature (°C)',
             data: maxTemps,
             borderColor: 'rgba(255, 99, 132, 1)',
             fill: false,
+            hidden: !showMaxTemp,
           },
           {
             label: 'Chance of Rain (%)',
             data: rainChances,
             borderColor: 'rgba(54, 162, 235, 1)',
             fill: false,
+            hidden: !showRainChance,
           },
           {
             label: 'Rainfall (mm)',
             data: rainfalls,
             borderColor: 'rgba(153, 102, 255, 1)',
             fill: false,
+            hidden: !showRainfall,
           },
         ],
       });
@@ -86,6 +93,8 @@ function Weather() {
       setLoading(false);
     }
   };
+
+
 
   return (
     <Container component="main" sx={{ mt: 10, mb: 5, flex: 1 }}>
@@ -139,18 +148,17 @@ function Weather() {
           </Grid>
         </form>
       </Paper>
-      {error && (
-        <Typography color="error" sx={{ mb: 2 }}>
-          {error}
-        </Typography>
-      )}
+
       {chartData && (
-        <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
-          <Typography variant="h5" gutterBottom>
-            Predicted Weather Data
-          </Typography>
-          <Line data={chartData} options={{ responsive: true }} />
-        </Paper>
+        <>
+
+          <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
+            <Typography variant="h5" gutterBottom>
+              Predicted Weather Data
+            </Typography>
+            <Line data={chartData} options={{ responsive: true }} />
+          </Paper>
+        </>
       )}
     </Container>
   );
