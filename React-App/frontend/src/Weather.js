@@ -5,6 +5,12 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+
+
+// register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+
 
 function Weather() {
   const locationsList = ['Adelaide', 'Albany', 'Albury', 'AliceSprings', 'BadgerysCreek', 'Ballarat', 
@@ -20,6 +26,8 @@ function Weather() {
   const [error, setError] = useState('');
   const [chartData, setChartData] = useState(null);
 
+  const [predictions, setPredictions] = useState(null); // storing raw API response
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -29,6 +37,9 @@ function Weather() {
       const response = await axios.get(`http://localhost:8000/predict/${location}/${startDate}`);
       const predictions = response.data.predictions;
 
+      setPredictions(predictions); // store detched data for JSON display
+
+
       // Format data for the chart
       const labels = predictions.map((pred) => pred.Date.slice(0, 10));  // Extract just the date part
       const minTemps = predictions.map((pred) => pred.Predicted_Min_Temp);
@@ -36,6 +47,8 @@ function Weather() {
       const rainChances = predictions.map((pred) => pred.Predicted_ChanceOfRain);
       const rainfalls = predictions.map((pred) => pred.Rainfall);
 
+
+      // setup chart date structure
       setChartData({
         labels,
         datasets: [
@@ -65,6 +78,8 @@ function Weather() {
           },
         ],
       });
+
+
     } catch (err) {
       setError('Error fetching predictions. Please try again.');
     } finally {
