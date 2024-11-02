@@ -8,12 +8,18 @@ from sklearn.linear_model import LinearRegression
 
 
 model_path = os.path.join(os.path.dirname(__file__), 'trained_model')
+<<<<<<< HEAD
+merged_data = pd.read_csv(os.path.join(os.path.dirname(__file__), 'merged_data.csv'))
+#merged_data = pd.read_csv(r"C:\Users\ashle\PycharmProjects\tensorEnv\pythonProject\innovation project\Assignment 3\BockCuster\Backend\merged_data.csv")
+scaler = StandardScaler()
+=======
 csv_path = os.path.join(os.path.dirname(__file__), 'merged_data.csv')
 
 try:
     merged_data = pd.read_csv(csv_path)
 except FileNotFoundError:
     raise FileNotFoundError(f"CSV file not found at {csv_path}")
+>>>>>>> 2e80cae974145fc11d38bf34d6a86778d8fa6b98
 
 
 class WeatherPredictionModel:

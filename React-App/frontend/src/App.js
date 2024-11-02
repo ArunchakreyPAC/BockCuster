@@ -24,6 +24,28 @@ import Influenza from './Influenza'
 import Weather from './Weather'
 import './App.css';
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.log(error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went wrong.</h1>;
+    }
+    return this.props.children;
+  }
+}
+
 function App() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -153,44 +175,9 @@ function App() {
         <Route path="/" element={
           <Container component="main" sx={{ mt:10, mb:5, flex:1}}>
             <Paper elevation={2} sx={{p:3, mb:3}}>
-              <form onSubmit={handleSubmitTemperature}>
-                <Grid container spacing={2} direction="column">
-                  <Grid item xs={12} sm={6}>
-                    <Typography fullWidth varaint="h4" component="h1" sx={{ pb:3, fontWeight:"200"}}>
-                      Temperature Predictor
-                    </Typography>
-                  </Grid>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        type = "date"
-                        variant = "outlined"
-                        value = {setDays}
-                        onChange = {(e) => setPredictedTemperature(e.target.value)}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <FormControl fullWidth variant="outlined">
-                        <InputLabel>
-                          Location
-                        </InputLabel>
-                        <Select
-                          label="Locations"
-                          value={locations}
-                          onChange={(e) => setLocations(e.target.value)}
-                        >
-                          {locationsList.map((locations) => (
-                            <MenuItem key={locations} value={locations}>
-                              {locations}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </form>
+              <Typography>
+                Hows it going
+              </Typography>
             </Paper>
           </Container>}/>
         <Route path="/Weather" element={<Weather/>}/>
