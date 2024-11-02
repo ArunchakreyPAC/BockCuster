@@ -7,6 +7,7 @@ from sklearn.preprocessing import StandardScaler
 
 model_path = os.path.join(os.path.dirname(__file__), 'trained_model')
 merged_data = pd.read_csv(os.path.join(os.path.dirname(__file__), 'merged_data.csv'))
+#merged_data = pd.read_csv(r"C:\Users\ashle\PycharmProjects\tensorEnv\pythonProject\innovation project\Assignment 3\BockCuster\Backend\merged_data.csv")
 scaler = StandardScaler()
 
 

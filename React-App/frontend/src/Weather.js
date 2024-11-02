@@ -25,7 +25,8 @@ const locationsList = [ 'Adelaide', 'Albany', 'Albury', 'AliceSprings', 'Badgery
   const [locations, setLocations] = useState('');
   const [predictedMaxTemperature, setPredictedMaxTemperature] = useState(null);
   const [predictedMinTemperature, setPredictedMinTemperature] = useState(null);
-  const [predictedRainFall, setPredictedRainFall] = useState(null);
+  const [predictedChanceofRain, setPredictedChanceofRain] = useState(null);
+  const [predictedRain, setPredictedRain] = useState(null)
   const [error, setError] = useState('');
   const [chartData, setChartData] = useState(null);
 
@@ -33,6 +34,9 @@ const locationsList = [ 'Adelaide', 'Albany', 'Albury', 'AliceSprings', 'Badgery
     e.preventDefault();
     setError('');
     setPredictedMaxTemperature(null);
+    setPredictedMinTemperature(null);
+    setPredictedChanceofRain(null);
+    setPredictedRain(null);
     setLoading(null);
     setLoading(true);
 
@@ -103,7 +107,54 @@ const locationsList = [ 'Adelaide', 'Albany', 'Albury', 'AliceSprings', 'Badgery
         </Grid>
       </form>
     </Paper>
-  </Container>
+    {error && (
+              <Typography color="error" sx={{ mb: 2 }}>
+                {error}
+              </Typography>
+            )}
+            {predictedMaxTemperature && (
+              <Paper elevation={3} sx={{ p: 3 }}>
+                <Typography variant="h5" gutterBottom>
+                  Predicted Price: ${predictedMaxTemperature.toLocaleString()}
+                </Typography>
+                {chartData && (
+                  <Box sx={{ mt: 3 }}>
+                    <Line 
+                      data={chartData}
+                      options={{
+                        responsive: true,
+                        plugins: {
+                          legend: {
+                            position: 'top',
+                          },
+                          title: {
+                            display: true,
+                            text: 'Price Predictions by Square Footage'
+                          }
+                        },
+                        scales: {
+                          x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                              display: true,
+                              text: 'Square Footage'
+                            }
+                          },
+                          y: {
+                            title: {
+                              display: true,
+                              text: 'Predicted Price ($)'
+                            }
+                          }
+                        }
+                      }}
+                    />
+                  </Box>
+                )}
+              </Paper>
+            )}
+        </Container>
   );
 }
 export default Weather;
