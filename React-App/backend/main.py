@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from datetime import datetime, timedelta
+from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 from model import WeatherPredictionModel, InfluenzaPredictionModel
 from pathlib import Path
@@ -11,6 +12,15 @@ class PredictionRequest(BaseModel):
     location: str
     start_date: str
     days: int = 7
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.post("/predict")
