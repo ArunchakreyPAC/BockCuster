@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 import pandas as pd
-from model import WeatherPredictionModel
+from model import WeatherPredictionModel, InfluenzaPredictionModel
 from pathlib import Path
 
 app = FastAPI()
@@ -70,6 +70,7 @@ async def get_predict(location: str, start_date: str):
         "predictions": predictions_output
     }
 
+
 @app.get("/test-load-models/{location}")
 async def test_load_models(location: str):
     # Define paths based on the location
@@ -99,6 +100,38 @@ async def test_load_models(location: str):
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"status": "Models loaded successfully", "file_status": files_exist}
+
+
+@app.get("/predict/{start_date}")
+async def get_flu_prediction(start_date: str):
+    try:
+        start_date = datetime.strptime(start_date, "%Y-%m-%d")
+        future_dates = pd.date_range(start=start_date, periods=7, freq='D')
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format.")
+    
+    # initialize prediction model
+    try:
+        model = InfluenzaPredictionModel()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error initializing model: {str(e)}")
+    
+
+    # generate predictions
+    try:
+        predictions = model.predict_flu(future_dates)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error during prediction: {str(e)}")
+
+
+    # format predictions for JSON response
+    predictions_output = predictions.to_dict(orient="records")
+    return {
+        "start_date": start_date.strftime("%Y-%m-%d"),
+        "predictions": predictions_output
+    }
+
+
 
 
 if __name__ == "__main__":
