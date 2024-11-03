@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, Utils } from 'react';
 import {
   Container, Grid, Paper, Button, Typography, TextField, MenuItem, FormControl,
-  InputLabel, Select, CircularProgress, FormControlLabel, Checkbox
+  InputLabel, Select, CircularProgress, FormControlLabel, Checkbox,
+  Backdrop,
+  backdropClasses
 } from '@mui/material';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
@@ -59,14 +61,14 @@ function Weather() {
             label: 'Min Temperature (°C)',
             data: minTemps,
             borderColor: 'rgba(75, 192, 192, 1)',
-            fill: false,
+            backgroundColor: Utils.transparentize(Utils.CHART_COLORS.red),
             hidden: !showMinTemp,
           },
           {
             label: 'Max Temperature (°C)',
             data: maxTemps,
             borderColor: 'rgba(255, 99, 132, 1)',
-            fill: false,
+            fill: true,
             hidden: !showMaxTemp,
           },
           {
@@ -74,13 +76,13 @@ function Weather() {
             data: rainChances,
             borderColor: 'rgba(54, 162, 235, 1)',
             fill: false,
-            hidden: !showRainChance,
+            hidden: showRainChance,
           },
           {
             label: 'Rainfall (mm)',
             data: rainfalls,
             borderColor: 'rgba(153, 102, 255, 1)',
-            fill: false,
+            fill: true,
             hidden: !showRainfall,
           },
         ],
