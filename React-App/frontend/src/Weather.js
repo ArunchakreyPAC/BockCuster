@@ -55,6 +55,9 @@ function Weather() {
 
       // setup chart date structure
       setChartData({
+        // Apparently, the labels comes with a toggle function...
+        // There's no need to include the "hidden: " attribute.
+        // how did we not know this..
         labels,
         datasets: [
           {
