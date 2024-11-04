@@ -22,6 +22,7 @@ import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import {Link} from 'react-router-dom';
 import Influenza from './Influenza'
 import Weather from './Weather'
+import Weather_Original from './Weather_Original'
 import './App.css';
 
 class ErrorBoundary extends React.Component {

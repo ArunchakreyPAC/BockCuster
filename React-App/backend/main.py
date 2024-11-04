@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 from model import WeatherPredictionModel, InfluenzaPredictionModel
@@ -8,11 +9,11 @@ from pathlib import Path
 
 app = FastAPI()
 
+# Request model with required fields for /predict and /predict/default endpoints
 class PredictionRequest(BaseModel):
-    location: str
-    start_date: str
-    days: int = 7
-
+    location: Optional[str] = "Melbourne"  # Default location
+    start_date: Optional[str] = "2024-11-01"  # Default start date
+    days: int = 7  # Default to 7 days
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,7 +22,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.post("/predict")
 async def predict_weather(request: PredictionRequest):
@@ -32,19 +32,16 @@ async def predict_weather(request: PredictionRequest):
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
 
-
     # Initialize the model with the requested location
     model = WeatherPredictionModel(request.location)
-
 
     # Get predictions
     try:
         predictions = model.predict(future_dates)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
 
-    # convert predictions to a dictionary format
+    # Convert predictions to dictionary format
     predictions_output = predictions.to_dict(orient="records")
     return {"location": request.location, "predictions": predictions_output}
 
@@ -71,7 +68,7 @@ async def get_predict(location: str, start_date: str):
         predictions = model.predict(future_dates)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error during prediction: {str(e)}")
-    
+
     # Format predictions for JSON response
     predictions_output = predictions.to_dict(orient="records")
     return {
@@ -98,9 +95,7 @@ async def test_load_models(location: str):
         "scaler_exists": scaler_file.is_file(),
     }
 
-
     print("Model paths and existence status:", files_exist)
-
 
     try:
         model = WeatherPredictionModel(location)
@@ -119,30 +114,25 @@ async def get_flu_prediction(start_date: str):
         future_dates = pd.date_range(start=start_date, periods=7, freq='D')
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format.")
-    
-    # initialize prediction model
+
+    # Initialize prediction model
     try:
         model = InfluenzaPredictionModel()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error initializing model: {str(e)}")
-    
 
-    # generate predictions
+    # Generate predictions
     try:
         predictions = model.predict_flu(future_dates)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error during prediction: {str(e)}")
 
-
-    # format predictions for JSON response
+    # Format predictions for JSON response
     predictions_output = predictions.to_dict(orient="records")
     return {
         "start_date": start_date.strftime("%Y-%m-%d"),
         "predictions": predictions_output
     }
-
-
-
 
 if __name__ == "__main__":
     import uvicorn
