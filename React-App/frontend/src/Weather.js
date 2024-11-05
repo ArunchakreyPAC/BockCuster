@@ -48,6 +48,7 @@ function Weather() {
             data: predictions.map((pred) => pred.Predicted_Max_Temp),
             borderColor: 'rgba(255, 99, 132, 1)',
             fill: false,
+
           },
           {
             label: 'Chance of Rain (%)',
