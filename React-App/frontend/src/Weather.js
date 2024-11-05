@@ -92,7 +92,7 @@ function Weather() {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Grid container spacing={4} justifyContent="center" sx={{mt:4}}>
-        <Grid container item xs={12} md={4} sx={{bgColor:"#202B3D"}}>
+        <Grid container item xs={12} sm={12} md={4} sx={{bgColor:"#202B3D"}} >
           <Card elevation={3} sx={{ p: 3, backgroundColor:'#202B3D', color:'white' }}>
             <CardContent>
             <Typography variant="h3" gutterBottom align='center'>
@@ -115,7 +115,7 @@ function Weather() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={7}>
+        <Grid item xs={12} sm={12} md={7}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <form onSubmit={handleSubmit}>
               <Typography variant="h4" sx={{ mb: 2 }}>
