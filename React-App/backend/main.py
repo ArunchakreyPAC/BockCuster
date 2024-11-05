@@ -80,18 +80,6 @@ async def get_predict(location: str, start_date: str):
         "predictions": predictions_output
     }
 
-@app.get("/predict/{location}/{start_date}")
-async def predict_weather(location: str, start_date: str):
-    print(f"Location: {location}, Start Date: {start_date}")  # Debugging print statement
-    try:
-        # Your prediction logic here
-        # Example: Load model and predict using provided location and date
-        # Assuming `model` is already loaded:
-        predictions = model.predict(location, start_date)
-        return {"predictions": predictions}
-    except Exception as e:
-        print(f"Error occurred: {e}")
-        raise HTTPException(status_code=500, detail="An error occurred while processing the request")
     
 @app.get("/test-load-models/{location}")
 async def test_load_models(location: str):
