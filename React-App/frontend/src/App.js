@@ -1,77 +1,41 @@
 import React, { useState } from 'react';
 import {
-  AppBar, Toolbar, Typography, Container, Grid, Card, CardContent, Button, Box,
-  Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton, TextField,
-  Switch, Snackbar, Alert, Fab, Dialog, DialogTitle, DialogContent, DialogContentText,
-  DialogActions, CircularProgress, LinearProgress, Chip, Avatar, Divider, Paper, MenuItem, FormControl,
-  InputLabel, Select
+  AppBar, Toolbar, Typography, Box, Drawer, List, ListItem, ListItemIcon, ListItemText,
+  IconButton, Divider, Button
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   Home as HomeIcon,
   Info as InfoIcon,
-  Mail as MailIcon,
-  Add as AddIcon,
 } from '@mui/icons-material';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import axios from 'axios';
-import { Line } from 'react-chartjs-2';
-import { useCallback } from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
-import {Link} from 'react-router-dom';
-import Influenza from './Influenza'
-import Weather from './Weather'
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import Influenza from './Influenza';
+import Weather from './Weather';
+import About from './About';
 import './App.css';
-
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.log(error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <h1>Something went wrong.</h1>;
-    }
-    return this.props.children;
-  }
-}
+import myImage from './background.jpg';
 
 function App() {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const handleDialogOpen = () => {
-    setDialogOpen(true);
-  };
-
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-  };
-
-  const handleSnackbarClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setSnackbarOpen(false);
-  };
+  const location = useLocation();
 
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
   };
+
   const drawerContent = (
-    <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
+    <Box
+      sx={{
+        width: 250,
+        transition: 'transform 0.5s ease-in-out',
+        '&:hover': {
+          transform: 'scale(1.02)',
+        },
+      }}
+      role="presentation"
+      onClick={toggleDrawer(false)}
+    >
       <List>
         <ListItem button component={Link} to="/" key="Home">
           <ListItemIcon><HomeIcon /></ListItemIcon>
@@ -82,107 +46,169 @@ function App() {
           <ListItemText primary="About" />
         </ListItem>
       </List>
-      <Divider/>
-        <List>
-          <ListItem button component={Link} to="/Weather">
-            <ListItemText primary = "Weather Predictor"/>
-          </ListItem>
-        </List>
-        <List>
-          <ListItem button component={Link} to="/Influenza">
-            <ListItemText primary = "Influenza Predictor"/>
-          </ListItem>
-        </List>
+      <Divider />
+      <List>
+        <ListItem button component={Link} to="/Weather" key="Weather">
+          <ListItemText primary="Weather Predictor" />
+        </ListItem>
+        <ListItem button component={Link} to="/Influenza" key="Influenza">
+          <ListItemText primary="Influenza Predictor" />
+        </ListItem>
+      </List>
     </Box>
   );
-//List of Locations
-  const locationsList = [ 'Adelaide', 'Albany', 'Albury', 'AliceSprings', 'BadgerysCreek',  'Ballarat', 
-    'Bendigo', 'Brisbane', 'Cairns', 'Canberra', 'Cobar',  'CoffsHarbour', 'Dartmoor', 'Darwin', 'GoldCoast', 
-    'Hobart',  'Katherine', 'Launceston', 'Melbourne', 'MelbourneAirport',  'Mildura', 'Moree', 'MountGambier', 
-    'MountGinini', 'Newcastle',  'Nhil', 'NorahHead', 'NorfolkIsland', 'Nuriootpa', 'PearceRAAF',  'Penrith', 
-    'Perth', 'PerthAirport', 'Portland', 'Richmond',  'Sale', 'SalmonGums', 'Sydney', 'SydneyAirport', 'Townsville',
-      'Tuggeranong', 'Uluru', 'WaggaWagga', 'Walpole', 'Watsonia',  'Williamtown', 'Witchcliffe', 'Wollongong', 'Woomera']
-  ;
-  
-  const [days, setDays] = useState('');
-  const [locations, setLocations] = useState('');
-  const [predictedTemperature, setPredictedTemperature] = useState(null);
-  const [predictedRainFall, setPredictedRainFall] = useState(null);
-  const [error, setError] = useState('');
-  const [chartData, setChartData] = useState(null);
 
-  const handleSubmitTemperature = async (e) => {
-    e.preventDefault();
-    setError('');
-    setPredictedTemperature(null);
-    setLoading(null);
-    setLoading(true);
-
-    try{
-      //Try getting values
-      const response = await axios.get(``)
-      setPredictedTemperature(response.data.predicted_temperature)
-
-      //Preparing the data for the chart
-    } catch(err){
-      setError('Error Predicting. Please Try again')
-    }
-    finally{
-      setLoading(false);
-    }
-  }
-
-  const handleSubmitRainFall = async (e) => {
-    e.preventDefault();
-    setError('');
-    setPredictedRainFall(null);
-    setLoading(null);
-    setLoading(true);
-
-    try{
-      //Try getting values
-      const response = await axios.get(``)
-      setPredictedRainFall(response.data.predicted_temperature)
-
-      //Preparing the data for the chart
-    } catch(err){
-      setError('Error Predicting. Please Try again')
-    }
-    finally{
-      setLoading(false);
-    }
-  }
-  
   return (
-    <Box sx={{display:'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'hsl(205, 50%, 37%)'}}>
-      <AppBar>
-        <Toolbar sx={{'bgcolor':'white'}}>
-          <IconButton edge="start" aria-label="menu" onClick={toggleDrawer(true)} sx={{'color':'black'}}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        height: '400px',
+        backgroundImage: `url(${myImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        transition: 'all 0.5s ease-in-out',
+      }}
+    >
+      <AppBar
+        position="fixed"
+        sx={{
+          transition: 'background-color 0.5s ease-in-out',
+          '&:hover': {
+            backgroundColor: '#1976d2', // Change background color slightly on hover
+          },
+        }}
+      >
+        <Toolbar sx={{ bgcolor: 'white', transition: 'all 0.3s ease' }}>
+          <IconButton
+            edge="start"
+            aria-label="menu"
+            onClick={toggleDrawer(true)}
+            sx={{ color: 'black', transition: 'all 0.3s ease-in-out', '&:hover': { transform: 'rotate(20deg)' } }}
+          >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h1" sx={{ml: 4 ,color:'black' ,flexGrow : 1, fontSize: 18}}>
+          <Typography
+            variant="h1"
+            sx={{
+              ml: 4,
+              color: 'black',
+              flexGrow: 1,
+              fontSize: 18,
+              transition: 'transform 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'scale(1.05)',
+              },
+            }}
+          >
             Weather Prediction App
           </Typography>
-          <IconButton edge="end" aria-label="home" sx={{'color':'black'}}>
-            <HomeIcon/>
+          <IconButton
+            edge="end"
+            aria-label="home"
+            sx={{
+              color: 'black',
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'rotate(-20deg)',
+              },
+            }}
+            component={Link}
+            to="/"
+          >
+            <HomeIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
       <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
         {drawerContent}
       </Drawer>
-      <Routes>
-        <Route path="/" element={
-          <Container component="main" sx={{ mt:10, mb:5, flex:1}}>
-            <Paper elevation={2} sx={{p:3, mb:3}}>
-              <Typography>
-                Hows it going
-              </Typography>
-            </Paper>
-          </Container>}/>
-        <Route path="/Weather" element={<Weather/>}/>
-        <Route path="/Influenza" element={<Influenza/>}/>
-      </Routes>
+
+      <Box className="main-content" sx={{ mt: 8 }}>
+        <TransitionGroup>
+          <CSSTransition key={location.key} classNames="fade" timeout={500}>
+            <Routes location={location}>
+              <Route
+                path="/"
+                element={
+                  <div
+                    className="home-container"
+                    sx={{
+                      transition: 'all 0.5s ease-in-out',
+                      '&:hover': {
+                        transform: 'scale(1.03)',
+                      },
+                    }}
+                  >
+                    <Typography
+                      variant="h3"
+                      className="header-text"
+                      gutterBottom
+                      sx={{
+                        transition: 'color 0.5s ease',
+                        '&:hover': {
+                          color: '#004e23',
+                        },
+                      }}
+                    >
+                      Welcome to the Weather Prediction App
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      className="body-text"
+                      gutterBottom
+                      sx={{
+                        transition: 'color 0.5s ease',
+                        '&:hover': {
+                          color: '#008b07',
+                        },
+                      }}
+                    >
+                      Use this app to predict weather conditions and influenza cases based on historical data.
+                      Click the buttons below to get started.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      className="action-button"
+                      component={Link}
+                      to="/Weather"
+                      sx={{
+                        marginTop: 4,
+                        transition: 'background-color 0.3s ease-in-out',
+                        '&:hover': {
+                          backgroundColor: '#005f56',
+                        },
+                      }}
+                    >
+                      Predict Weather
+                    </Button>
+                    <Button
+                      variant="contained"
+                      className="action-button"
+                      component={Link}
+                      to="/Influenza"
+                      sx={{
+                        marginTop: 4,
+                        transition: 'background-color 0.3s ease-in-out',
+                        '&:hover': {
+                          backgroundColor: '#005f56',
+                        },
+                      }}
+                    >
+                      Predict Influenza
+                    </Button>
+                  </div>
+                }
+              />
+              <Route path="/Weather" element={<Weather />} />
+              <Route path="/Influenza" element={<Influenza />} />
+              <Route path="/about" element={<About />} />
+            </Routes>
+          </CSSTransition>
+        </TransitionGroup>
+      </Box>
     </Box>
   );
 }
