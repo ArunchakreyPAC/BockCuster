@@ -83,6 +83,25 @@ function Weather() {
     }
   };
 
+    useEffect(() => {
+    const fetchCurrentDatePrediction = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.post(`http://localhost:8000/predict/`, {
+          location: 'Melbourne',
+          start_date: new Date().toISOString().split('T')[0],
+          days: 1,
+        });
+        setCurrentDatePrediction(response.data.predictions[0]);
+      } catch (err) {
+        setError('Error fetching data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCurrentDatePrediction();
+  }, []);
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Grid container spacing={4} justifyContent="center" sx={{mt:4}}>
