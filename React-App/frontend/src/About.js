@@ -45,8 +45,8 @@ function About() {
                     src={mem1}
                     sx={{ width: 100, height: 100, mb: 2 }}
                   />
-                  <Typography variant="h6">Yilong Ma</Typography>
-                  <Typography variant="body2">Role: Founder of Tesala</Typography>
+                  <Typography variant="h6">Arunchakrey</Typography>
+                  <Typography variant="body2">Role: Frontend</Typography>
                 </Box>
               </Grid>
 
@@ -58,8 +58,8 @@ function About() {
                     src={mem2}
                     sx={{ width: 100, height: 100, mb: 2 }}
                   />
-                  <Typography variant="h6">Xong Xina</Typography>
-                  <Typography variant="body2">Role: Data Scientist</Typography>
+                  <Typography variant="h6">Pongpisith Keo</Typography>
+                  <Typography variant="body2">Role: Frontend</Typography>
                 </Box>
               </Grid>
 
@@ -71,8 +71,8 @@ function About() {
                     src={mem3}
                     sx={{ width: 100, height: 100, mb: 2 }}
                   />
-                  <Typography variant="h6">Dogpool</Typography>
-                  <Typography variant="body2">Role: Project Manager</Typography>
+                  <Typography variant="h6">Ratanakvisal</Typography>
+                  <Typography variant="body2">Role: Backend</Typography>
                 </Box>
               </Grid>
             </Grid>
