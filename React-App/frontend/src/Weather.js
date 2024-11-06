@@ -10,7 +10,16 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 function Weather() {
-  const locationsList = ['Adelaide', 'Albany', 'Albury', 'AliceSprings', 'Melbourne', /* Add the rest */];
+  const locationsList = ['Albury', 'BadgerysCreek', 'Cobar', 'CoffsHarbour', 'Moree',
+       'Newcastle', 'NorahHead', 'NorfolkIsland', 'Penrith', 'Richmond',
+       'Sydney', 'SydneyAirport', 'WaggaWagga', 'Williamtown',
+       'Wollongong', 'Canberra', 'Tuggeranong', 'MountGinini', 'Ballarat',
+       'Bendigo', 'Sale', 'MelbourneAirport', 'Melbourne', 'Mildura',
+       'Nhil', 'Portland', 'Watsonia', 'Dartmoor', 'Brisbane', 'Cairns',
+       'GoldCoast', 'Townsville', 'Adelaide', 'MountGambier', 'Nuriootpa',
+       'Woomera', 'Albany', 'Witchcliffe', 'PearceRAAF', 'PerthAirport',
+       'Perth', 'SalmonGums', 'Walpole', 'Hobart', 'Launceston',
+       'AliceSprings', 'Darwin', 'Katherine', 'Uluru'];
   
   const [location, setLocation] = useState('Melbourne'); // Set default to Melbourne
   const [startDate, setStartDate] = useState('');
